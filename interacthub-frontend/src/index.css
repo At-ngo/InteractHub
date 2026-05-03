@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background-color: #F3F2EF;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #191919;
+}
+
+.dark body {
+  background-color: #1D2226 !important;
+  color: #E7E7E7;
+}
+
+.dark .bg-white {
+  background-color: #2D2D2D !important;
+  color: #E7E7E7;
+}
+
+.dark .border-linkedin-border {
+  border-color: #444 !important;
+}
+
+.dark .bg-linkedin-gray {
+  background-color: #1D2226 !important;
+}
+
+.dark .text-linkedin-text {
+  color: #E7E7E7 !important;
+}
+
+.dark .text-linkedin-muted {
+  color: #A0A0A0 !important;
+}
+
+.dark input, .dark textarea {
+  background-color: #3D3D3D !important;
+  color: #E7E7E7 !important;
+  border-color: #555 !important;
+}
+
+@keyframes progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.animate-progress {
+  animation: progress 5s linear forwards;
+}

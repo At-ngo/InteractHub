@@ -1,0 +1,6 @@
+// dán vào Console (DevTools)
+const token = localStorage.getItem('token'); // hoặc paste token string trực tiếp
+if (!token) { console.log('No token found'); } else {
+  const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+  console.log(payload);
+}

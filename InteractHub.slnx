@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="InteractHub.API/InteractHub.API.csproj" />
+  <Project Path="InteractHub.Tests/InteractHub.Tests.csproj" />
+</Solution>
