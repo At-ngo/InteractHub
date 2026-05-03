@@ -4,7 +4,7 @@ WORKDIR /src
 # copy csproj and restore as distinct layers
 COPY InteractHub.API/InteractHub.API.csproj ./InteractHub.API/
 COPY InteractHub.API/*.sln ./
-COPY InteractHub.API/*.props ./ || true
+# COPY InteractHub.API/*.props ./ || true
 RUN dotnet restore InteractHub.API/InteractHub.API.csproj
 
 # copy everything and publish
