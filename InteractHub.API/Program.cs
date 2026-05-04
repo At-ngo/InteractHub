@@ -85,6 +85,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+// Ensure correct middleware ordering: HTTPS -> Routing -> CORS -> Auth -> Authorization -> MapControllers
+app.UseHttpsRedirection();
+app.UseRouting(); // required before UseCors
 
 app.UseCors("AllowReact");
 app.UseAuthentication();
@@ -103,7 +106,5 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 }
-
-app.Run();
 
 app.Run();
