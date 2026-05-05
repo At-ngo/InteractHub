@@ -1,9 +1,10 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../config/constants';
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://interacthub-api1.onrender.com/api';
+
+export const api = axios.create({
+  baseURL: API_BASE,
+  headers: { 'Content-Type': 'application/json' }
 });
 
 // Tự động gắn JWT token vào mỗi request
