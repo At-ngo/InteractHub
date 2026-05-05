@@ -9,12 +9,14 @@ export const authService = {
     fullName: string;
     dateOfBirth: string;
   }) {
-    const res = await api.post<ApiResponse<string>>('/Auth/register', data);
+    // Thêm chữ /api vào đường dẫn
+    const res = await api.post<ApiResponse<string>>('/api/Auth/register', data);
     return res.data;
   },
 
   async login(data: { email: string; password: string }) {
-    const res = await api.post<ApiResponse<AuthResponse>>('/Auth/login', data);
+    // Thêm chữ /api vào đường dẫn
+    const res = await api.post<ApiResponse<AuthResponse>>('/api/Auth/login', data);
     return res.data;
   },
 };
