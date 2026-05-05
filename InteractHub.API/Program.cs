@@ -54,17 +54,17 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+        policy.AllowAnyOrigin()   // Cho phép mọi domain (kể cả Vercel)
+              .AllowAnyHeader()   // Cho phép mọi Header
+              .AllowAnyMethod();  // Cho phép mọi Method (GET, POST, PUT...)
+        // Lưu ý: Khi dùng AllowAnyOrigin thì không được dùng AllowCredentials()
     });
 });
+
 // Services - Dependency Injection
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPostService, PostService>();
@@ -77,16 +77,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-// Ensure correct middleware ordering: HTTPS -> Routing -> CORS -> Auth -> Authorization -> MapControllers
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
+
+
 app.UseRouting(); // required before UseCors
 
 app.UseCors("AllowReact");
