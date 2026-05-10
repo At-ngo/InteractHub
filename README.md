@@ -32,16 +32,28 @@ docker compose build
 docker compose up
 ```
 
-API will be available at http://localhost:5271 and frontend at http://localhost:5173 by default.
+Khi chạy local Docker: API tại `http://localhost:5271`, frontend tại `http://localhost:5173`.
+
+> **Production:** Backend deploy trên **Render**, Frontend deploy trên **Vercel**, Database (MySQL) trên **Railway**.
 
 ## CI/CD
 
-- A GitHub Actions workflow `.github/workflows/ci.yml` runs on push/PR to `main`:
-  - Builds backend and runs tests
-  - Builds frontend
+**CI** — `.github/workflows/ci.yml` chạy trên mọi push/PR vào `main`:
+- Build & chạy 17 unit tests (.NET)
+- Build frontend (React/Vite)
 
-- A CD workflow `.github/workflows/cd.yml` can deploy the backend to Azure App Service using a publish profile.
-  - Set the `AZURE_WEBAPP_PUBLISH_PROFILE` and `AZURE_WEBAPP_NAME` repository secrets to enable automatic deploys.
+**CD** — `.github/workflows/cd.yml` chạy tự động khi push vào `main`:
+- 🚀 **Backend** → deploy lên **Render** qua Deploy Hook
+- 🌐 **Frontend** → deploy lên **Vercel** qua Vercel CLI
+- 🗄️ **Database** → **Railway** (MySQL), kết nối qua connection string trong Render environment variables
+
+### GitHub Secrets cần thiết
+
+| Secret | Mô tả |
+|---|---|
+| `RENDER_DEPLOY_HOOK_URL` | Render → Service → Settings → Deploy Hook |
+| `VERCEL_TOKEN` | Vercel → Account Settings → Tokens |
+| `VITE_API_URL` | URL backend Render, ví dụ `https://interacthub.onrender.com` |
 
 ## Docker
 
