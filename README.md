@@ -1,8 +1,133 @@
 # InteractHub
 
-This repository contains an ASP.NET Core backend and a React (Vite) frontend.
+> **Mạng xã hội chuyên nghiệp** — LinkedIn Clone được xây dựng với ASP.NET Core 8 (backend) và React 19 + Vite (frontend).
 
-## Local development
+Các tính năng chính: đăng ký / đăng nhập JWT, đăng bài viết, kết bạn, nhắn tin, thông báo real-time, stories, hashtag, báo cáo nội dung, tìm kiếm việc làm.
+
+---
+
+## ⚙️ Setup & Installation
+
+### Prerequisites
+
+| Tool | Version tối thiểu | Link |
+|---|---|---|
+| .NET SDK | 8.0 | [download](https://dotnet.microsoft.com/download/dotnet/8.0) |
+| Node.js | 20+ | [download](https://nodejs.org) |
+| Git | bất kỳ | [download](https://git-scm.com) |
+
+> Docker là tùy chọn — chỉ cần nếu muốn chạy stack qua Docker Compose.
+> Database dùng **Railway (MySQL)** — không cần cài MySQL local.
+
+---
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/At-ngo/InteractHub.git
+cd InteractHub
+```
+
+---
+
+### 2. Cấu hình Backend
+
+#### 2.1 Tạo file `appsettings.Development.json`
+
+File này ghi đè lên `appsettings.json` khi chạy môi trường Development.
+Tạo tại `InteractHub.API/appsettings.Development.json`:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=<RAILWAY_HOST>;Port=<PORT>;Database=railway;User=root;Password=<PASSWORD>;SslMode=None;AllowPublicKeyRetrieval=True;"
+  },
+  "JwtSettings": {
+    "SecretKey": "<ít_nhất_32_ký_tự_bất_kỳ>",
+    "Issuer": "InteractHub",
+    "Audience": "InteractHubUsers",
+    "ExpirationDays": 7
+  },
+  "Cloudinary": {
+    "CloudName": "<CLOUDINARY_CLOUD_NAME>",
+    "ApiKey": "<CLOUDINARY_API_KEY>",
+    "ApiSecret": "<CLOUDINARY_API_SECRET>"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  }
+}
+```
+
+> ⚠️ **Không commit file này** — nó đã có trong `.gitignore`.
+
+#### 2.2 Lấy thông tin Railway
+
+1. Đăng nhập [railway.app](https://railway.app)
+2. Vào project → chọn service **MySQL**
+3. Tab **Connect** → sao chép các giá trị: `Host`, `Port`, `Password`
+
+#### 2.3 Tạo Cloudinary account
+
+1. Đăng ký tại [cloudinary.com](https://cloudinary.com) (miễn phí)
+2. Vào **Dashboard** → sao chép `Cloud Name`, `API Key`, `API Secret`
+3. Điền vào `appsettings.Development.json` ở bước 2.1
+
+---
+
+### 3. Cấu hình Frontend
+
+Tạo file `.env.local` trong thư mục `interacthub-frontend/` (dựa theo `.env.example`):
+
+```bash
+cd interacthub-frontend
+cp .env.example .env.local   # Linux/macOS
+# hoặc: copy .env.example .env.local   # Windows
+```
+
+Sau đó chỉnh nội dung `.env.local`:
+
+```env
+# Khi dev local: trỏ vào backend đang chạy
+VITE_API_BASE_URL=http://localhost:5271
+```
+
+> File `.env.production` đã có sẵn và trỏ vào URL Render — không cần sửa khi deploy.
+
+---
+
+### 4. Cài đặt dependencies
+
+**Backend:**
+```bash
+cd InteractHub.API
+dotnet restore
+```
+
+**Frontend:**
+```bash
+cd interacthub-frontend
+npm install
+```
+
+---
+
+### 5. Database Migration
+
+Không cần chạy migration thủ công. `Program.cs` đã có:
+
+```csharp
+await dbContext.Database.MigrateAsync();
+```
+
+Schema sẽ tự động được áp dụng khi backend khởi động lần đầu.
+
+---
+
+## 🖥️ Local Development
 
 - Backend: `InteractHub.API` (ASP.NET Core)
 - Frontend: `interacthub-frontend` (React + Vite)
@@ -39,7 +164,7 @@ Khi chạy local Docker: API tại `http://localhost:5271`, frontend tại `http
 ## CI/CD
 
 **CI** — `.github/workflows/ci.yml` chạy trên mọi push/PR vào `main`:
-- Build & chạy 17 unit tests (.NET)
+- Build & chạy 36 unit tests (.NET)
 - Build frontend (React/Vite)
 
 **CD** — `.github/workflows/cd.yml` chạy tự động khi push vào `main`:
