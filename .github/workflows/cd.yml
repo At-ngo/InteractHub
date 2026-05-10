@@ -5,35 +5,51 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy-azure-appservice:
+  # ─────────────────────────────────────────
+  # 1. Deploy Backend → Render
+  # ─────────────────────────────────────────
+  deploy-backend:
+    name: Deploy Backend to Render
     runs-on: ubuntu-latest
-    if: github.event.pusher != null && secrets.AZURE_WEBAPP_PUBLISH_PROFILE != ''
+    steps:
+      - name: Trigger Render Deploy Hook
+        # Render tự build & deploy khi nhận POST đến deploy hook URL.
+        # Thêm secret RENDER_DEPLOY_HOOK_URL vào GitHub repository secrets.
+        run: |
+          curl -s --fail -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
+            -o /dev/null -w "HTTP status: %{http_code}\n"
+
+  # ─────────────────────────────────────────
+  # 2. Deploy Frontend → Vercel
+  # ─────────────────────────────────────────
+  deploy-frontend:
+    name: Deploy Frontend to Vercel
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '8.0.x'
-      - name: Publish
-        run: |
-          dotnet publish InteractHub.API/InteractHub.API.csproj -c Release -o out
-      - name: Deploy to Azure WebApp
-        uses: azure/webapps-deploy@v4
-        with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ./InteractHub.API/out
 
-  # Alternative: push images to a container registry and deploy via container service (ECS/AKS)
-  # Uncomment and configure if you prefer registry-based deploy
-  # build-and-push-image:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Build and push backend image
-  #       uses: docker/build-push-action@v4
-  #       with:
-  #         context: ./
-  #         file: InteractHub.API/Dockerfile
-  #         push: true
-  #         tags: ${{ secrets.REGISTRY_URL }}/interacthub-api:latest
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel environment
+        run: |
+          vercel pull --yes --environment=production \
+            --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./interacthub-frontend
+
+      - name: Build project (Vercel)
+        run: |
+          vercel build --prod \
+            --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./interacthub-frontend
+
+      - name: Deploy to Vercel (production)
+        run: |
+          vercel deploy --prebuilt --prod \
+            --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./interacthub-frontend

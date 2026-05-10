@@ -39,7 +39,7 @@ namespace InteractHub.API.Controllers
                 .Include(p => p.Likes)
                 .Include(p => p.Comments)
                 .Include(p => p.PostHashtags).ThenInclude(ph => ph.Hashtag)
-                .Include(p => p.SharedPost).ThenInclude(sp => sp.User)
+                .Include(p => p.SharedPost!).ThenInclude(sp => sp.User)
                 .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -573,7 +573,7 @@ namespace InteractHub.API.Controllers
                 .Include(p => p.Likes)
                 .Include(p => p.Comments)
                 .Include(p => p.PostHashtags).ThenInclude(ph => ph.Hashtag)
-                .Include(p => p.SharedPost).ThenInclude(sp => sp.User)
+                .Include(p => p.SharedPost!).ThenInclude(sp => sp.User)
                 .OrderByDescending(p => p.CreatedAt)
                 .Select(p => new PostResponseDto
                 {

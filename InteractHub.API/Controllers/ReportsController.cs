@@ -296,7 +296,7 @@ namespace InteractHub.API.Controllers
 
             // if approved -> restore content or unlock user depending on original action log
             var log = await _context.Set<InteractHub.API.Models.Entities.ReportActionLog>().Where(l => l.ReportId == reportId).OrderByDescending(l => l.PerformedAt).FirstOrDefaultAsync();
-            if (dto.Approve && log != null)
+            if (dto.Approve && log != null && report != null)
             {
                 var action = log.Action;
                 if (action == "ban-user")
