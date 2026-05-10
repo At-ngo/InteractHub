@@ -156,5 +156,127 @@ namespace InteractHub.Tests.Services
             Assert.Equal("Đã bỏ like", message);
             Assert.Equal(0, await context.Likes.CountAsync());
         }
+
+        [Fact]
+        public async Task UpdatePost_ValidUser_ReturnsSuccess()
+        {
+            // Arrange
+            var context = CreateInMemoryContext();
+            context.Posts.Add(new Post
+            {
+                Id = 1, Content = "Original", ImageUrl = null,
+                UserId = "user1", IsDeleted = false
+            });
+            await context.SaveChangesAsync();
+
+            var service = new PostService(context);
+            var dto = new UpdatePostDto { Content = "Updated content", ImageUrl = "https://img.url" };
+
+            // Act
+            var (success, message) = await service.UpdatePostAsync(1, dto, "user1");
+
+            // Assert
+            Assert.True(success);
+            Assert.Equal("Cập nhật thành công", message);
+
+            var post = await context.Posts.FindAsync(1);
+            Assert.Equal("Updated content", post!.Content);
+            Assert.Equal("https://img.url", post.ImageUrl);
+        }
+
+        [Fact]
+        public async Task UpdatePost_WrongUser_ReturnsFail()
+        {
+            // Arrange
+            var context = CreateInMemoryContext();
+            context.Posts.Add(new Post
+            {
+                Id = 1, Content = "Original", UserId = "owner", IsDeleted = false
+            });
+            await context.SaveChangesAsync();
+
+            var service = new PostService(context);
+            var dto = new UpdatePostDto { Content = "Hacked" };
+
+            // Act
+            var (success, message) = await service.UpdatePostAsync(1, dto, "hacker");
+
+            // Assert
+            Assert.False(success);
+            Assert.Equal("Không tìm thấy bài viết", message);
+        }
+
+        [Fact]
+        public async Task GetPostById_ExistingPost_ReturnsDto()
+        {
+            // Arrange
+            var context = CreateInMemoryContext();
+            var user = new AppUser
+            {
+                Id = "user1", UserName = "testuser",
+                Email = "t@x.com", FullName = "Test User"
+            };
+            context.Users.Add(user);
+            context.Posts.Add(new Post
+            {
+                Id = 1, Content = "Hello", UserId = "user1", IsDeleted = false
+            });
+            await context.SaveChangesAsync();
+
+            var service = new PostService(context);
+
+            // Act
+            var result = await service.GetPostByIdAsync(1, "user1");
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(1, result.Id);
+            Assert.Equal("Hello", result.Content);
+        }
+
+        [Fact]
+        public async Task GetPostById_DeletedPost_ReturnsNull()
+        {
+            // Arrange
+            var context = CreateInMemoryContext();
+            context.Posts.Add(new Post
+            {
+                Id = 1, Content = "Deleted", UserId = "user1", IsDeleted = true
+            });
+            await context.SaveChangesAsync();
+
+            var service = new PostService(context);
+
+            // Act
+            var result = await service.GetPostByIdAsync(1, "user1");
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task CreatePost_WithExistingHashtag_ReusesHashtag()
+        {
+            // Arrange
+            var context = CreateInMemoryContext();
+            context.Hashtags.Add(new Hashtag { Id = 1, Name = "dotnet", UseCount = 5 });
+            await context.SaveChangesAsync();
+
+            var service = new PostService(context);
+            var dto = new CreatePostDto
+            {
+                Content = "Post with existing hashtag",
+                Hashtags = new List<string> { "dotnet" }
+            };
+
+            // Act
+            var (success, _) = await service.CreatePostAsync(dto, "user1");
+
+            // Assert
+            Assert.True(success);
+            Assert.Equal(1, await context.Hashtags.CountAsync()); // không tạo mới
+            var hashtag = await context.Hashtags.FirstAsync();
+            Assert.Equal(6, hashtag.UseCount); // tăng thêm 1
+        }
     }
 }
